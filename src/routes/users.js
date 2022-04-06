@@ -10,7 +10,7 @@ const jwt = require('jsonwebtoken')
 // 获取用户列表
 router.get('/list', cors(), async (req, res, next) => {
   const user = await User.find()
-  
+
   res.header("Access-Control-Allow-Origin", "*")
 
   res.send({
@@ -24,7 +24,9 @@ router.get('/info/:userId', cors(), async (req, res, next) => {
 
   res.header("Access-Control-Allow-Origin", "*")
 
-  User.findOne({ userId: req.params.userId })
+  User.findOne({
+      userId: req.params.userId
+    })
     .then(info => {
       if (!info || info.userId != req.params.userId) {
         errors.code = 404
@@ -33,7 +35,9 @@ router.get('/info/:userId', cors(), async (req, res, next) => {
       }
       res.json(info)
     })
-    .catch(err => { res.status(404).json(err) })
+    .catch(err => {
+      res.status(404).json(err)
+    })
 })
 
 // 获取个人信息
@@ -76,7 +80,7 @@ router.post('/login', async (req, res, next) => {
 
   if (!isPasswordValid) {
     let realpwd = bcrypt.hashSync(req.body.password, 10)
-    console.log(realpwd )
+    console.log(realpwd)
     return res.send({
       code: 101,
       message: '密码无效'
@@ -121,14 +125,14 @@ router.post('/register', async (req, res, next) => {
           username: req.body.username
         }
       }).then((data) => {
-        
+
         console.log(data)
         // console.log(data.username)
         // console.log(data.userId)
         // console.log(req.body.username)
         // console.log(data.username == req.body.username)
 
-        if (data == {}|| !data || data.username != req.body.username) {
+        if (data == {} || !data || data.username != req.body.username) {
           const date = Date.now()
           // 组装数据
           resObj.code = 200
@@ -176,9 +180,82 @@ router.post('/register', async (req, res, next) => {
   Common.autoFn(tasks, res, resObj)
 })
 
+// 修改用户密码
+router.post('/changeUserPassword', async (req, res, next) => {
+  const resObj = {}
+
+  res.header("Access-Control-Allow-Origin", "*")
+
+  const user = await User.findOne({
+    username: req.body.username
+  })
+
+  // 判断输入的原密码与数据库中的密码是否一致
+  const isOldPasswordValid = bcrypt.compareSync(
+    req.body.password,
+    user.password
+  )
+
+  if (!isOldPasswordValid) {
+    let realpwd = bcrypt.hashSync(req.body.password, 10)
+    console.log(realpwd)
+    return res.send({
+      code: 101,
+      message: '您输入的原密码无效'
+    })
+  }
+
+  const isNewPassword = req.body.newPassword
+  // 判断新密码是否为空
+  if (isNewPassword == '') {
+    return res.send({
+      code: 101,
+      message: '新密码不能为空'
+    })
+  }
+
+  // 判断输入的新密码与原来数据库中的密码是否相同
+  let tempPwd = bcrypt.hashSync(req.body.newPassword, 10)
+  const isNewPasswordValid = bcrypt.compareSync(
+    tempPwd,
+    user.password
+  )
+
+  if (!isNewPasswordValid) {
+    return res.send({
+      code: 101,
+      message: '您输入的新密码与原密码相同'
+    })
+  }
+
+  // 更新密码
+  User.updateOne(
+    { username: req.body.username },
+    {
+      $set: {
+        password: tempPwd,
+        updateTime: Date.now()
+      }
+    }
+  ).then((data) => {
+    console.log(data)
+    resObj.code = 200
+    resObj.message = "修改成功"
+    resObj.changeTime = Date.now()
+  }).catch((err) => {
+    console.log(err)
+    cb({
+      code: 000,
+      message: err
+    })
+  })
+  
+  Common.autoFn(tasks, res, resObj)
+})
+
 // /* GET users listing. */
 // router.get('/', function(req, res, next) {
 //   res.send('respond with a resource');
 // });
 
-module.exports = router;
+module.exports = router
