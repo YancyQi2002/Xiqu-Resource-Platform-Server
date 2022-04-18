@@ -239,18 +239,70 @@ router.post('/changeUserPassword', async (req, res, next) => {
     }
   ).then((data) => {
     console.log(data)
-    resObj.code = 200
-    resObj.message = "修改成功"
-    resObj.changeTime = Date.now()
   }).catch((err) => {
     console.log(err)
-    cb({
+    res.send({
       code: 000,
       message: err
     })
   })
+
+  resObj.code = 200
+  resObj.message = "修改成功"
+  resObj.changeTime = Date.now()
   
-  Common.autoFn(tasks, res, resObj)
+  res.send(resObj)
+})
+
+// 修改用户信息
+router.post('/changeUserInfo', async (req, res, next) => {
+  const resObj = {}
+
+  res.header("Access-Control-Allow-Origin", "*")
+
+  const user = await User.findOne({
+    username: req.body.username
+  })
+
+  console.log(user)
+  console.log(req.body)
+
+  let tempPhone = bcrypt.hashSync(req.body.phone, 10)
+
+  // 更新用户信息
+  User.updateOne(
+    { username: req.body.username },
+    {
+      $set: {
+        phone: tempPhone,
+        phonename: req.body.phonename,
+        avatar: req.body.avatar,
+        email: req.body.email,
+        updateTime: Date.now()
+      }
+    }
+  ).then((data) => {
+    console.log(data)
+  }).catch((err) => {
+    console.log(err)
+    res.send({
+      code: 000,
+      message: err
+    })
+  })
+
+  resObj.code = 200
+  resObj.message = "修改成功"
+  resObj.changeTime = Date.now()
+  resObj.data = {
+    username: req.body.username,
+    phone: req.body.phone,
+    phonename: req.body.phonename,
+    avatar: req.body.avatar,
+    email: req.body.email
+  }
+
+  res.send(resObj)
 })
 
 // /* GET users listing. */
