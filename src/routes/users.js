@@ -305,6 +305,45 @@ router.post('/changeUserInfo', async (req, res, next) => {
   res.send(resObj)
 })
 
+// 修改用户权限
+router.post('/changeUserJurisdiction', async (req, res, next) => {
+  const resObj = {}
+
+  res.header("Access-Control-Allow-Origin", "*")
+
+  const user = await User.findOne({
+    username: req.body.username
+  })
+
+  console.log(user)
+  console.log(req.body)
+
+  // 更新用户权限
+  User.updateOne(
+    { username: req.body.username },
+    {
+      $set: {
+        jurisdiction: req.body.jurisdiction,
+        updateTime: Date.now()
+      }
+    }
+  ).then((data) => {
+    console.log(data)
+  }).catch((err) => {
+    console.log(err)
+    res.send({
+      code: 000,
+      message: err
+    })
+  })
+
+  resObj.code = 200
+  resObj.message = "修改成功"
+  resObj.changeTime = Date.now()
+  resObj.data = req.body
+  res.send(resObj)
+})
+
 // /* GET users listing. */
 // router.get('/', function(req, res, next) {
 //   res.send('respond with a resource');
