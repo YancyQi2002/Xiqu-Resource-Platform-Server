@@ -9,16 +9,46 @@ const bcrypt = require('bcrypt')
 
 // 获取京剧资源列表
 router.get('/jingjulist', cors(), async (req, res, next) => {
-  const jingjulist = await Jingju.find()
-
-  console.log(jingjulist)
+  const page = req.query.page
+  const rows = req.query.rows
 
   res.header("Access-Control-Allow-Origin", "*")
 
+  const jingjulist = await Jingju.find().skip(page - 1).limit(rows)
+  const total = await Jingju.find().count()
+
+  console.log(jingjulist)
+  console.log(total)
+
   res.send({
     code: 200,
-    data: jingjulist
+    data: jingjulist,
+    total: total
   })
+})
+
+// 查询指定京剧资源详细信息
+router.get('/jingjuinfo/:_id', cors(), async (req, res, next) => {
+  const errors = {}
+
+  res.header("Access-Control-Allow-Origin", "*")
+
+  Jingju.findOne({
+      _id: req.params._id
+    }).then(info => {
+      if (!info || info._id != req.params._id) {
+        errors.code = 404
+        errors.message = "京剧资源不存在"
+        return res.status(404).json(errors)
+      }
+      console.log(info)
+      res.send({
+        code: 200,
+        data: info
+      })
+    }).catch(err => {
+      res.status(404).json(err)
+    })
 })
 
 // 编辑条目简介

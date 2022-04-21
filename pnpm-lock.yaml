@@ -21,7 +21,7 @@ specifiers:
   http-errors: ^2.0.0
   husky: ^7.0.4
   jsonwebtoken: ^8.5.1
-  lint-staged: ^12.3.8
+  lint-staged: ^12.4.0
   method-override: ^3.0.0
   mongoose: ^6.3.0
   mongoose-long: ^0.5.1
@@ -61,7 +61,7 @@ devDependencies:
   commitizen: 4.2.4
   cz-git: 1.2.3_commitizen@4.2.4
   husky: 7.0.4
-  lint-staged: 12.3.8
+  lint-staged: 12.4.0
   prettier: 2.6.2
 
 packages:
@@ -364,7 +364,7 @@ packages:
     resolution: {integrity: sha512-ELCPqAdroMdcuxqwMgUpifQyRoTpyYCNr1V9xKyF40VsBobsj+BbWNRvwGchMgBPGqkw655ypkjj2MEF5ywVwg==}
     deprecated: This is a stub types definition. bson provides its own type definitions, so you do not need this installed.
     dependencies:
-      bson: 4.6.2
+      bson: 4.6.3
     dev: false
 
   /@types/connect/3.4.35:
@@ -720,8 +720,8 @@ packages:
       fill-range: 7.0.1
     dev: true
 
-  /bson/4.6.2:
-    resolution: {integrity: sha512-VeJKHShcu1b/ugl0QiujlVuBepab714X9nNyBdA1kfekuDGecxgpTA2Z6nYbagrWFeiIyzSWIOzju3lhj+RNyQ==}
+  /bson/4.6.3:
+    resolution: {integrity: sha512-rAqP5hcUVJhXP2MCSNVsf0oM2OGU1So6A9pVRDYayvJ5+hygXHQApf87wd5NlhPM1J9RJnbqxIG/f8QTzRoQ4A==}
     engines: {node: '>=6.9.0'}
     dependencies:
       buffer: 5.7.1
@@ -2026,8 +2026,8 @@ packages:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
     dev: true
 
-  /lint-staged/12.3.8:
-    resolution: {integrity: sha512-0+UpNaqIwKRSGAFOCcpuYNIv/j5QGVC+xUVvmSdxHO+IfIGoHbFLo3XcPmV/LLnsVj5EAncNHVtlITSoY5qWGQ==}
+  /lint-staged/12.4.0:
+    resolution: {integrity: sha512-3X7MR0h9b7qf4iXf/1n7RlVAx+EzpAZXoCEMhVSpaBlgKDfH2ewf+QUm7BddFyq29v4dgPP+8+uYpWuSWx035A==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     hasBin: true
     dependencies:
@@ -2315,7 +2315,7 @@ packages:
     resolution: {integrity: sha512-A2l8MjEpKojnhbCM0MK3+UOGUSGvTNNSv7AkP1fsT7tkambrkkqN/5F2y+PhzsV0Nbv58u04TETpkaSEdI2zKA==}
     engines: {node: '>=12.9.0'}
     dependencies:
-      bson: 4.6.2
+      bson: 4.6.3
       denque: 2.0.1
       mongodb-connection-string-url: 2.5.2
       socks: 2.6.2
@@ -2335,7 +2335,7 @@ packages:
     resolution: {integrity: sha512-3x2pEGlZ5SorqcL0/hmUIAzzHIh6a/VIAEv3zAmc93qDtSz3WBbF8PwYYHcXm6Awfck9/zFOV9KIUEE+HjVepA==}
     engines: {node: '>=12.0.0'}
     dependencies:
-      bson: 4.6.2
+      bson: 4.6.3
       kareem: 2.3.5
       mongodb: 4.5.0
       mpath: 0.8.4
