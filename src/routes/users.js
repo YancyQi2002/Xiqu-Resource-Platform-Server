@@ -9,12 +9,18 @@ const jwt = require('jsonwebtoken')
 
 // 获取用户列表
 router.get('/list', cors(), async (req, res, next) => {
-  const user = await User.find()
+  const page = req.query.page
+  const rows = req.query.rows
 
   res.header("Access-Control-Allow-Origin", "*")
 
+  const user = await User.find().skip(page - 1).limit(rows)
+  const total = await User.find().count()
+
   res.send({
-    data: user
+    code: 200,
+    data: user,
+    total: total
   })
 })
 
@@ -25,8 +31,8 @@ router.get('/info/:userId', cors(), async (req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
 
   User.findOne({
-      userId: req.params.userId
-    })
+    userId: req.params.userId
+  })
     .then(info => {
       if (!info || info.userId != req.params.userId) {
         errors.code = 404
@@ -90,7 +96,9 @@ router.post('/login', async (req, res, next) => {
   // 生成 token
   const token = jwt.sign({
     id: String(user._id)
-  }, process.env.SECRET_OR_PRIVATEKEY)
+  }, process.env.SECRET_OR_PRIVATEKEY, {
+    expiresIn: '1h'
+  })
 
   const data = {}
 
@@ -110,74 +118,49 @@ router.post('/register', async (req, res, next) => {
 
   console.log(req)
 
-  let tasks = {
-    // 校验参数方法
-    checkParams: (cb) => {
-      // 调用公共方法里的校验参数方法
-      Common.checkParams(req.body, ['username', 'password', 'phone', 'phonename', 'email'], cb)
-    },
+  res.header("Access-Control-Allow-Origin", "*")
 
-    // 查询方法
-    query: ['checkParams', (results, cb) => {
-      // 通过用户名去数据库中查询
-      User.findOne({
-        where: {
-          username: req.body.username
-        }
-      }).then((data) => {
+  const user = await User.findOne({
+    where: {
+      username: req.body.username
+    }
+  })
+  console.log(user)
 
-        console.log(data)
-        // console.log(data.username)
-        // console.log(data.userId)
-        // console.log(req.body.username)
-        // console.log(data.username == req.body.username)
-
-        if (data == {} || !data || data.username != req.body.username) {
-          const date = Date.now()
-          // 组装数据
-          resObj.code = 200
-          resObj.data = {
-            username: req.body.username,
-            password: bcrypt.hashSync(req.body.password, 10),
-            jurisdiction: '0',
-            phone: bcrypt.hashSync(req.body.phone, 10),
-            phonename: req.body.phonename,
-            avatar: "",
-            createTime: date,
-            updateTime: date,
-            userId: mongoose.Types.ObjectId()
-          }
-          console.log(resObj)
-          User.create(resObj.data).then(() => {
-            resObj.message = '注册成功'
-            console.log(resObj)
-          }).catch((err) => {
-            cb({
-              code: 000,
-              message: err
-            })
-          })
-        } else if (data.username == req.body.username) {
-          resObj.code = 200
-          resObj.data = {
-            success: false,
-            message: '注册失败，用户名已存在'
-          }
-          cb(null, req.body.username)
-        }
-      }).catch((err) => {
-        // 错误处理
-        // console.log(err)
-        // console.log(resObj)
-        cb({
-          code: 188,
-          message: '系统错误'
-        })
+  if (user == {} || !user || user.username != req.body.username) {
+    const date = Date.now()
+    // 组装数据
+    resObj.code = 200
+    resObj.data = {
+      username: req.body.username,
+      password: bcrypt.hashSync(req.body.password, 10),
+      jurisdiction: '0',
+      phone: bcrypt.hashSync(req.body.phone, 10),
+      phonename: req.body.phonename,
+      avatar: "",
+      createTime: date,
+      updateTime: date,
+      userId: mongoose.Types.ObjectId()
+    }
+    // 存入数据库
+    User.create(resObj.data).then(() => {
+      resObj.message = '注册成功'
+      console.log(resObj)
+      res.send(resObj)
+    }).catch((err) => {
+      res.send({
+        code: 000,
+        message: err
       })
-    }]
+    })
+  } else if (data.username == req.body.username) {
+    resObj.code = 200
+    resObj.data = {
+      success: false,
+      message: '注册失败，用户名已存在'
+    }
+    res.send(resObj)
   }
-
-  Common.autoFn(tasks, res, resObj)
 })
 
 // 修改用户密码
@@ -250,7 +233,7 @@ router.post('/changeUserPassword', async (req, res, next) => {
   resObj.code = 200
   resObj.message = "修改成功"
   resObj.changeTime = Date.now()
-  
+
   res.send(resObj)
 })
 
@@ -342,6 +325,50 @@ router.post('/changeUserJurisdiction', async (req, res, next) => {
   resObj.changeTime = Date.now()
   resObj.data = req.body
   res.send(resObj)
+})
+
+// 删除用户
+router.post('/deleteUser', async (req, res, next) => {
+  const resObj = {}
+
+  res.header("Access-Control-Allow-Origin", "*")
+
+  if (req.body.username == 'admin') {
+    resObj.code = 200
+    resObj.message = "管理员不可删除"
+    resObj.changeTime = Date.now()
+    res.send(resObj)
+    return
+  }
+
+  const user = await User.findOne({
+    username: req.body.username
+  })
+
+  // console.log(user)
+
+  if (user.jurisdiction == '1') {
+    resObj.code = 200
+    resObj.message = "管理员不可删除"
+    resObj.changeTime = Date.now()
+    res.send(resObj)
+    return
+  }
+
+  // 查找并删除用户
+  User.findByIdAndRemove(user._id).then((data) => {
+    console.log(data)
+    resObj.code = 200
+    resObj.message = "删除成功"
+    resObj.changeTime = Date.now()
+    res.send(resObj)
+  }).catch((err) => {
+    console.log(err)
+    res.send({
+      code: 000,
+      message: err
+    })
+  })
 })
 
 // /* GET users listing. */

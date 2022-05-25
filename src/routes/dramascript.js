@@ -51,6 +51,30 @@ router.get('/jingjuinfo/:_id', cors(), async (req, res, next) => {
     })
 })
 
+// 根据京剧剧目查询京剧资源
+router.post('/jingjuinfo', cors(), async (req, res, next) => {
+  const errors = {}
+
+  res.header("Access-Control-Allow-Origin", "*")
+
+  Jingju.find({
+    jingjuname: req.body.jingjuname
+  }).then(info => {
+    if (!info || info.length == 0) {
+      errors.code = 404
+      errors.message = "京剧资源不存在"
+      return res.status(404).json(errors)
+    }
+    console.log(info)
+    res.send({
+      code: 200,
+      data: info
+    })
+  }).catch(err => {
+    res.status(404).json(err)
+  })
+})
+
 // 编辑条目简介
 router.post('/editItemSynopsis', cors(), async (req, res, next) => {
   const resObj = {}
@@ -144,6 +168,98 @@ router.post('/editItemSynopsis', cors(), async (req, res, next) => {
   }
 
   Common.autoFn(tasks, res, resObj)
+})
+
+// 添加京剧条目
+router.post('/addJingjuItem', cors(), async (req, res, next) => {
+  const resObj = {}
+
+  res.header("Access-Control-Allow-Origin", "*")
+
+  console.log(req.body)
+
+  Jingju.insertOne({
+    jingjuname: req.body.jingjuname,
+    jingjuId: mongoose.Types.ObjectId(),
+    tag: req.body.tag,
+    faction: req.body.faction,
+    actor: req.body.actor,
+    synopsis: "",
+    content: "",
+    video: req.body.video,
+    audio: req.body.audio,
+    createTime: Date.now(),
+    updateTime: Date.now()
+  }).then((result) => {
+    console.log("result：" + result)
+    res.send({
+      code: 200,
+      message: '添加成功'
+    })
+  }).catch(err => {
+    resObj.code = 188
+    resObj.message = '系统错误'
+    resObj.err = err
+    res.send(resObj)
+  })
+})
+
+// 修改京剧条目
+router.post('/editJingjuItem', cors(), async (req, res, next) => {
+  const resObj = {}
+
+  res.header("Access-Control-Allow-Origin", "*")
+
+  Jingju.findByIdAndUpdate(req.body.jingjuId, {
+    $set: {
+      jingjuname: req.body.jingjuname,
+      actor: req.body.actor,
+      tag: req.body.tag,
+      faction: req.body.faction,
+      synopsis: req.body.synopsis,
+      video: req.body.video,
+      content: req.body.content,
+      updateTime: Date.now()
+    }
+  }).then(function (result) {
+    // 查询处理结果
+    if (result) {
+      // 更新成功
+      resObj.code = 200
+      resObj.message = '更新成功'
+      res.send(resObj)
+    } else {
+      resObj.code = 1001
+      resObj.message = '更新失败'
+      res.send(resObj)
+    }
+  }).catch((err) => {
+    // 错误处理
+    console.log(err)
+    resObj.code = 188
+    resObj.message = '系统错误'
+    res.send(resObj)
+  })
+})
+
+// 删除京剧条目
+router.delete('/deleteJingjuItem', cors(), async (req, res, next) => {
+  const resObj = {}
+
+  res.header("Access-Control-Allow-Origin", "*")
+
+  Jingju.findByIdAndRemove(req.body._id).then(() => {
+    res.json({
+      code: 200,
+      message: '删除成功'
+    })
+    return
+  }).catch((err) => {
+    resObj.code = 188
+    resObj.message = '系统错误'
+    resObj.err = err
+    res.send(resObj)
+  })
 })
 
 // 获取北京歌剧资源列表

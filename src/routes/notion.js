@@ -108,47 +108,26 @@ function getRelativeTimeDesc(time) {
   const currentInMs = new Date().getTime()
   const timeInMs = new Date(time).getTime()
 
-  const minuteInMs = calc('60 * 1000')
-  const hourInMs = calc('60 * M', {
-    variable: {
-      M: minuteInMs
-    }
-  })
-  const dayInMs = calc('24 * H', {
-    variable: {
-      H: hourInMs
-    }
-  })
-  const monthInMs = calc('30 * D', {
-    variable: {
-      D: dayInMs
-    }
-  })
-  const yearInMs = calc('365 * D', {
-    variable: {
-      D: dayInMs
-    }
-  })
+  const minuteInMs = 60 * 1000
+  const hourInMs = 60 * minuteInMs
+  const dayInMs = 24 * hourInMs
+  const monthInMs = 30 * dayInMs
+  const yearInMs = 365 * dayInMs
 
-  const relativeTime = calc('C - T', {
-    variable: {
-      C: currentInMs,
-      T: timeInMs
-    }
-  })
+  const relativeTime = currentInMs - timeInMs
 
   if (relativeTime < minuteInMs) {
-    return `${Math.ceil(calc('R / 1000', {variable: {R: relativeTime}}))} 秒前`
+    return `${Math.ceil(relativeTime / 1000)} 秒前`
   } else if (relativeTime < hourInMs) {
-    return `${Math.ceil(calc('R / M', {variable: {R: relativeTime, M: minuteInMs}}))} 分钟前`
+    return `${Math.ceil(relativeTime / minuteInMs)} 分钟前`
   } else if (relativeTime < dayInMs) {
-    return `${Math.ceil(calc('R / H', {variable: {R: relativeTime, H: hourInMs}}))} 小时前`
+    return `${Math.ceil(relativeTime / hourInMs)} 小时前`
   } else if (relativeTime < monthInMs) {
-    return `${Math.ceil(calc('R / D', {variable: {R: relativeTime, D: dayInMs}}))} 天前`
+    return `${Math.ceil(relativeTime / dayInMs)} 天前`
   } else if (relativeTime < yearInMs) {
-    return `${Math.ceil(calc('R / M', {variable: {R: relativeTime, M: monthInMs}}))} 月前`
+    return `${Math.ceil(relativeTime / monthInMs)} 月前`
   } else {
-    return `${Math.ceil(calc('R / Y', {variable: {R: relativeTime, Y: yearInMs}}))} 年前`
+    return `${Math.ceil(relativeTime / yearInMs)} 年前`
   }
 }
 
